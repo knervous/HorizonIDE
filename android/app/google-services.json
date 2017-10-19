@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "892021746460",
+    "project_id": "firebase-jcompiler"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:892021746460:android:c3c93840873fb624",
+        "android_client_info": {
+          "package_name": "com.jcompiler"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "892021746460-0s8j2deh8dsb86gghacemuoovbupgqaf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jcompiler",
+            "certificate_hash": "5b08212a607521b32320b696354b701aed31f401"
+          }
+        },
+        {
+          "client_id": "892021746460-04urnpeloisslns1p7gt82sj43n2a7hp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJHM7EdaaYMhInSLRignd3AIJbG4sg0Xs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

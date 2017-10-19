@@ -18,7 +18,7 @@ export default class ProjectSelect extends React.Component {
     this.state = {
       user: null,
       projects: [],
-      selectedProject: {},
+      selectedProject: null,
       horizonId: ''
     }
   }
@@ -55,6 +55,7 @@ export default class ProjectSelect extends React.Component {
 
 
   render() {
+    console.dir(this.state)
       return (
         <Image 
           style={styles.container}
@@ -88,7 +89,7 @@ export default class ProjectSelect extends React.Component {
                 style={styles.text}
               >Choose an existing project...</Text>
             <Picker
-              selectedValue={this.state.selectedProject}
+              selectedValue={this.state.selectedProject === null ? 'Loading...' : this.state.selectedProject}
               style={styles.picker}
               onValueChange={(itemValue, itemIndex) => this.setState({selectedProject: itemValue})}
               >

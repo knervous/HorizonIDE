@@ -9,7 +9,7 @@ import { Actions } from 'react-native-router-flux';
 import {
   StyleSheet,
   Text,
-  View, TextInput, Image, Alert
+  View, TextInput, Image, Alert, Modal
 } from 'react-native';
 import Button from 'react-native-button';
 import GDrive from "react-native-google-drive-api-wrapper";
@@ -22,7 +22,8 @@ export default class CreateNewProject extends React.Component {
       user: props.user,
       projects: props.projects,
       projectName: '',
-      mainClass: ''
+      mainClass: '',
+      modalVisible: false
     }
 
   }
@@ -82,29 +83,42 @@ export default class CreateNewProject extends React.Component {
   }
 
   async _createNewProject(){
-    console.dir(this.state)
-    console.dir(this.props)
     if(!this._validateSubmit()){
       return;
     }
-    let id = await GDrive.files.safeCreateFolder({
+    this.setState({modalVisible: true})
+    
+    var projectTree = this.state.projectName.split(" "),
+        capMain = capitalizeFirstLetter(this.state.mainClass),
+        id = await GDrive.files.safeCreateFolder({
             name: this.state.projectName,
             parents: [this.props.id]
-        }),
-        mainClass = this.state.mainClass;
-    mainClass[0] = mainClass[0].toUpperCase();
+        });
+  
     await GDrive.files.createFileMultipart(
-      createClassTemplate(this.state.projectName.replace(" ",".").toLowerCase(), capitalizeFirstLetter(this.state.mainClass)),
-      "text/plain", {
-          parents: [id],
-          name: `${mainClass}.java`
-      });
-    
-    await GDrive.files.createFileMultipart(
-      JSON.stringify(createMetaInfo(capitalizeFirstLetter(this.state.mainClass))),
+      JSON.stringify(createMetaInfo(capMain)),
       "text/plain", {
           parents: [id],
           name: `meta.json`
+      });
+
+    id = await GDrive.files.safeCreateFolder({
+      name: 'src',
+      parents: [id]
+    })
+
+    for(let p of projectTree){
+      id = await GDrive.files.safeCreateFolder({
+        name: p,
+        parents: [id]
+      })
+    }
+
+    await GDrive.files.createFileMultipart(
+      createClassTemplate(this.state.projectName.split('').reduce((a,b) =>  a.concat(b === ' ' ? '.' : b)  ).toLowerCase(), capMain),
+      "text/plain", {
+          parents: [id],
+          name: `${capMain}.java`
       });
 
     Alert.alert(
@@ -115,10 +129,8 @@ export default class CreateNewProject extends React.Component {
       ],
       { cancelable: true }
     )
-    Actions.pop({update: true});
-      
-    
-    
+    this.setState({modalVisible: false})
+    Actions.projectSelect({update: true, user: this.props.user});
   }
 
   componentDidMount(){
@@ -135,6 +147,7 @@ export default class CreateNewProject extends React.Component {
           resizeMethod='resize'
           source={require('../lib/img/bg.jpg')}
       >
+      
         {
           this.props.user ? 
           <View
@@ -168,6 +181,23 @@ export default class CreateNewProject extends React.Component {
               onPress={this._createNewProject.bind(this)}
               style={styles.button}
             >Create Project</Button>
+
+         
+              <Modal
+                animationType="fade"
+                transparent={true}
+                visible={this.state.modalVisible}
+                style={{marginTop: 0}}
+                onRequestClose={()=>{}} //nothing!
+                >
+                <View style={{justifyContent: 'center',alignItems: 'center',marginTop:100, backgroundColor: 'white', height: 100, margin: 25}}>
+                  <Text>Loading, please wait...</Text>
+                  <Text>Project is being created</Text>
+                </View>
+              </Modal>
+            
+
+
           </View>
 
           :

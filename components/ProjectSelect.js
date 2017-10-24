@@ -45,6 +45,7 @@ export default class ProjectSelect extends React.Component {
             console.dir(result)
             this.setState({
               projects: result.files,
+              selectedProject: result.files[0],
               horizonId: id
             })
           })
@@ -89,18 +90,20 @@ export default class ProjectSelect extends React.Component {
                 style={styles.text}
               >Choose an existing project...</Text>
             <Picker
-              selectedValue={this.state.selectedProject === null ? 'Loading...' : this.state.selectedProject}
+              selectedValue={this.state.selectedProject}
               style={styles.picker}
               onValueChange={(itemValue, itemIndex) => this.setState({selectedProject: itemValue})}
               >
               {
               this.state.projects.map((p) => 
-                <Picker.Item key={p.id} label={p.name} value={p.id} />
+                <Picker.Item key={p.id} label={p.name} value={p.id} selected/>
                 )
               }
             </Picker>
             <Button
-              onPress={()=>{ Actions.editor() }}
+              disabled={this.state.projects.length === 0}
+              styleDisabled={styles.buttonDisabled}
+              onPress={()=>{ Actions.editor({user: this.props.user, id: this.state.selectedProject}) }}
               style={styles.button}
             >Load Project</Button>
             </View>
@@ -163,6 +166,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 5,
     color: '#fafafa'
+  },
+  buttonDisabled: {
+    margin: 5,
+    backgroundColor: '#B0B0B0',
+    borderWidth:1,
+    borderColor: 'black',
+    borderRadius: 10,
+    padding: 5,
+    color: '#D0D0D0'
   },
   picker: {
     width: 250,

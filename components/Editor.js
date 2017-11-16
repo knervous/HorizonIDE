@@ -26,7 +26,7 @@ const client = require('socket.io-client')
 export default class Editor extends React.Component {
   constructor(props){
     super(props)
-    Drive.
+    
     this.state = {
       classText: 'package Java; \r\n \r\n'
       +' public class TestApp {  \r\n\r\n'
@@ -125,9 +125,13 @@ export default class Editor extends React.Component {
     console.dir(this.state)
     console.dir(GDrive)
 
-    updateExistingFile(this.state.classText, 'text/plain', '', this.state.selectedValue.id).then((res) => {
-      return res.json()
-    })
+//     updateFileContent(this.state.selectedValue.id, this.state.classText, (res) => {
+//       console.dir(res)
+//     }).then((res) => {
+//       console.dir(res)
+//     })
+//  return;
+    updateExistingFile(this.state.classText, 'text/plain', '', this.state.selectedValue.id).then((res) => res.json())
     .then((result) => {
       console.dir(result)
     })
@@ -220,16 +224,11 @@ export default class Editor extends React.Component {
 
 
 updateExistingFile = (media, mediaType, metadata, id) =>{
-  const ddb = `--${GDrive.files.params.boundary}`;
-  const ending = `\n${ddb}--`;
 
-  let body = `\n${ddb}\n` +
-     `Content-Type: ${GDrive._contentTypeJson}\n\n` +
-     `${JSON.stringify(metadata)}\n\n${ddb}\n` +
-     `Content-Type: ${mediaType}\n\n`;
+  let body = ''
   
   if (media.constructor == String) {
-     body += `${media}${ending}`;
+     body += `${media}`;
   } else {
      body = new Uint8Array(
         StaticUtils.encodedUtf8ToByteArray(utf8.encode(body))
@@ -240,14 +239,29 @@ updateExistingFile = (media, mediaType, metadata, id) =>{
   return fetch(
      `https://www.googleapis.com/upload/drive/v2/files/${id}`, {
         method: "PUT",
+        'params': {'uploadType': 'multipart', 'alt': 'json'},
         headers: GDrive._createHeaders(
-           `multipart/mixed; boundary=${GDrive.files.params.boundary}`,
+           `text/plain; boundary=${GDrive.files.params.boundary}`,
            body.length),
         body: body
      });
 }
 
 
+function updateFileContent(fileId, contentBlob, callback) {
+  var xhr = new XMLHttpRequest();
+  xhr.responseType = 'json';
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState != XMLHttpRequest.DONE) {
+      return;
+    }
+    callback(xhr.response);
+  };
+  xhr.open('PATCH', 'https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=media');
+  xhr.setRequestHeader('Authorization', 'Bearer ' + GDrive.accessToken);
+  xhr.send(contentBlob);
+
+}
 
 
 const styles = StyleSheet.create({
